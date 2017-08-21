@@ -15,11 +15,19 @@ class User < ActiveRecord::Base
             format: { with: /^[\w+\-.]+@[a-z\d\-.]+\.[a-z]+$/i, multiline: true },
             uniqueness: { case_sensitive: false }
 
-  def self.by_total_points
-    joins(:points).group('users.id').order('SUM(points.value) DESC')
-  end
+
+  scope :by_total_points, -> {
+   includes(:points).group('users.id').reorder("total_points DESC LIMIT 50")
+ }
+
+  # scope :by_total_points, joins(:points).select('name, sum(points.value) as total_points').order('total_points desc')
+
+  # def self.by_total_points
+  #   joins(:points).group('users.id').order('SUM(points.value) DESC')
+  # end
 
   def total_points
+    # byebug
     self.points.sum(:value)
   end
 
